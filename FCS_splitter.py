@@ -73,7 +73,10 @@ def identify_files(path_str, max_time=4000.0, dt=1.0, roll_window=10):
         roll_window (int): Rolling average window size in binned points.
     """
     folder = Path(path_str)
-    csv_files = list(folder.glob('*.csv'))
+    csv_files = sorted(
+        file for file in folder.glob('*.csv')
+        if not file.name.startswith('._')
+    )
 
     # Dictionaries accumulate one column per input file.
     # Key = file name, value = sliced 1D signal for that phase.
@@ -88,6 +91,8 @@ def identify_files(path_str, max_time=4000.0, dt=1.0, roll_window=10):
     activated_fl1_cols = {}
 
     for file in csv_files:
+
+        print(file)
 
         # Read one FlowJo export and keep experiment-relevant time range.
         raw_data = pd.read_csv(file)
