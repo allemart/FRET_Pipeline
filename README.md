@@ -8,7 +8,6 @@ This folder contains the publication pipeline for processing FlowJo-exported FAC
 - `Normalization_estimator_normalized_FL2.py`
 - `R18_Kinet_routine_publ.ipynb`
 - `R18_Kinet_routine_publ_normalized_FL2_AUC.ipynb`
-- `join_two_csvs.py`
 
 ## Experimental Input Context
 AUC standardization (`AUCSTD`) was calibrated using 3 replicates from 25 WT mice.
@@ -55,6 +54,7 @@ Example:
 ```bash
 python Normalization_estimator.py \
   --folder <processed_parent_folder> \
+  --output-dir ../results \
   --low 55 \
   --high 65
 ```
@@ -68,8 +68,8 @@ Open `R18_Kinet_routine_publ.ipynb` and:
 3. Run all cells.
 
 Notebook outputs:
-- Per-subfolder: `Analyzed.xlsx` (assembled normalized FL1 traces).
-- Master-level: `result.xlsx` with `Resting` and `Activated` values.
+- Per-subfolder, in `../results`: `<subfolder>_Analyzed.xlsx` (assembled normalized FL1 traces).
+- Master-level, in `../results`: `result.xlsx` with `Resting` and `Activated` values.
 
 ## Optional: Normalized FL2 AUC Calibration
 `Normalization_estimator_normalized_FL2.py` follows the same input and baseline filtering steps as `Normalization_estimator.py`, but computes AUC after each FL2 loading trace is divided by its own loading-window maximum:
@@ -78,7 +78,7 @@ Notebook outputs:
 normalized_FL2_AUC = AUC(loading_FL2 / max(loading_FL2))
 ```
 
-This produces a normalized-FL2 `AUC_std` that can be used as an alternative when absolute FL2 intensity is less desirable as the correction reference. In this version, the correction is based on the shape and timing of the R18 loading curve after each trace has been scaled to its own maximum. It therefore reduces dependence on absolute FL2 amplitude, which may vary with acquisition settings, staining/loading magnitude, or session-level intensity differences.
+This produces a normalized-FL2 `AUC_std` that can be used as an alternative when absolute FL2 intensity is less desirable as the correction reference. In this version, the correction is based on the shape and timing of the R18 loading curve after each trace has been normalized to its own maximum. It therefore reduces dependence on absolute FL2 amplitude, which may vary with acquisition settings, staining/loading magnitude, or session-level intensity differences.
 
 This option was added for cases where R18 loading appears excessive relative to the range observed in the WT calibration traces. In those cases, FL2 fluorescence can be substantially above the usual range and can skew absolute-FL2-AUC normalization, even when the Leo.H4/HeadP_Ab quenching dynamics and apparent availability of FRET acceptors are not otherwise changed. The normalized-FL2 pathway is therefore useful as an assay-debugging and robustness workflow for reducing sensitivity to unusually high R18 amplitude.
 
@@ -94,6 +94,7 @@ Example:
 ```bash
 python3 Normalization_estimator_normalized_FL2.py \
   --folder <processed_parent_folder> \
+  --output-dir ../results \
   --low 55 \
   --high 65
 ```
@@ -104,11 +105,18 @@ Then open `R18_Kinet_routine_publ_normalized_FL2_AUC.ipynb` and:
 3. Run all cells.
 
 Notebook outputs:
-- Per-subfolder: `Analyzed_normalized_FL2_AUC.xlsx`.
-- Master-level: `result_normalized_FL2_AUC.xlsx` with `Resting` and `Activated` values.
+- Per-subfolder, in `../results`: `<subfolder>_Analyzed_normalized_FL2_AUC.xlsx`.
+- Master-level, in `../results`: `result_normalized_FL2_AUC.xlsx` with `Resting` and `Activated` values.
 
 
 ## Notes
 - The scripts assume split outputs are under `Loading_Baseline/` in each experiment subfolder.
 - Keep channel naming consistent with script expectations (`fl1`, `fl2` file suffixes).
 - If your FlowJo export columns differ from expected names (for example `Comp-FL1-H`, `Comp-FL2-H`), align column names before running.
+
+## Code Ocean Notes
+- Place input data under `../data`, with one processed dataset folder per experiment group. Each experiment subfolder should contain the `Loading_Baseline/` files listed above.
+- The estimator scripts write spreadsheets and figures to `../results` by default. Use `--output-dir ../results` explicitly when running in Code Ocean.
+- `FCS_splitter.py` uses manual landmark selection and is intended for interactive preprocessing before headless Code Ocean execution. For Code Ocean runs, upload the already split `Loading_Baseline/` CSV files to `../data`.
+- Install runtime dependencies through the Code Ocean environment editor rather than inside the scripts. Required Python packages are `numpy`, `pandas`, `matplotlib`, and `openpyxl`.
+- The repository contains source code and notebooks only; raw data and generated result files should remain outside the `../code` folder.

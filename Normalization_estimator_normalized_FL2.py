@@ -16,10 +16,10 @@ Pipeline summary:
 1. Import loading FL1/FL2 traces from all subfolders.
 2. Normalize FL1 to each trace's own pre-R18 initial level (`initial_fl1` mean = 100%).
 3. Build an FL1 trace that includes loading + baseline phases.
-4. Max-normalize each FL2 loading trace and estimate normalized FL2 AUC.
+4. Normalize each FL2 loading trace to its own maximum and estimate normalized FL2 AUC.
 5. Select traces whose normalized FL1 baseline falls in `[low, high]`.
 6. Use median normalized FL2 AUC of selected traces as `AUC_std`.
-7. Scale FL1 traces by `(trace_normalized_FL2_AUC / AUC_std)`.
+7. Correct FL1 traces by `(trace_normalized_FL2_AUC / AUC_std)`.
 8. Export summary tables and trace plots.
 
 CLI example:
@@ -55,7 +55,7 @@ def _drop_duplicate_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def normalized_fl2_auc(series: pd.Series, window: int = AUC_WINDOW) -> float:
-    """Compute AUC after scaling the FL2 loading window to its own maximum."""
+    """Compute AUC after normalizing the FL2 loading window to its own maximum."""
     loading_window = series.dropna().iloc[:window]
     max_value = loading_window.max()
 
@@ -267,13 +267,18 @@ def _build_parser():
     parser.add_argument(
         "--export-xlsx",
         default=None,
-        help="Optional output xlsx path. Defaults to '<folder>_normalized_FL2_AUC.xlsx'.",
+        help="Optional output xlsx path. Overrides --output-dir when provided.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="../results",
+        help="Directory for exported spreadsheets and figures (default: ../results).",
     )
     parser.add_argument(
         "--show-plot",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Display interactive matplotlib window (default: true).",
+        default=False,
+        help="Display interactive matplotlib window (default: false).",
     )
     return parser
 
@@ -298,7 +303,9 @@ def main():
     auc_std = auc_gold(loading_fl2, good_mask, window=args.auc_window)
     normalized = normalize_fl1(trace_fl1, loading_fl2, auc_std, window=args.auc_window)
 
-    export_path = args.export_xlsx or f"{args.folder}_normalized_FL2_AUC.xlsx"
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    export_path = args.export_xlsx or str(output_dir / f"{folder_path.name}_normalized_FL2_AUC.xlsx")
     plot_all(
         trace_fl1,
         loading_fl2,

@@ -13,7 +13,7 @@ Pipeline summary:
 4. Estimate FL2 loading AUC for each trace (first `AUC_WINDOW` points).
 5. Select traces whose normalized FL1 baseline falls in `[low, high]`.
 6. Use median FL2 AUC of selected traces as `AUC_std` (gold-standard AUC).
-7. Scale FL1 traces by `(trace_FL2_AUC / AUC_std)`.
+7. Correct FL1 traces by `(trace_FL2_AUC / AUC_std)`.
 8. Export summary tables and plot raw FL2, pre-AUC FL1, and post-AUC FL1.
 
 CLI example:
@@ -261,13 +261,18 @@ def _build_parser():
     parser.add_argument(
         "--export-xlsx",
         default=None,
-        help="Optional output xlsx path. Defaults to '<folder>.xlsx'.",
+        help="Optional output xlsx path. Overrides --output-dir when provided.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="../results",
+        help="Directory for exported spreadsheets and figures (default: ../results).",
     )
     parser.add_argument(
         "--show-plot",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Display interactive matplotlib window (default: true).",
+        default=False,
+        help="Display interactive matplotlib window (default: false).",
     )
     return parser
 
@@ -293,7 +298,9 @@ def main():
     auc_std = auc_gold(loading_fl2, good_mask, window=args.auc_window)
     wt_norm = normalize_fl1(trace_fl1, loading_fl2, auc_std, window=args.auc_window)
 
-    export_path = args.export_xlsx or f"{args.folder}.xlsx"
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    export_path = args.export_xlsx or str(output_dir / f"{folder_path.name}.xlsx")
     plot_all(
         trace_fl1,
         loading_fl2,
