@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/1176990598.svg)](https://doi.org/10.5281/zenodo.21970830)
+
 # R18 / HeadP_Ab Analysis Pipeline
 
 This folder contains the publication pipeline for processing FlowJo-exported FACS traces from gated platelet populations.
