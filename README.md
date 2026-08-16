@@ -37,8 +37,8 @@ Optional alternative:
 
 Example:
 ```bash
-python FACSScripts/Paper/FCS_splitter.py \
-  --parent-folder "/path/to/FCS Exports/JAK2" \
+python FCS_splitter.py \
+  --parent-folder <flowjo_export_folder> \
   --process-subfolders
 ```
 
@@ -53,8 +53,8 @@ python FACSScripts/Paper/FCS_splitter.py \
 
 Example:
 ```bash
-python FACSScripts/Paper/Normalization_estimator.py \
-  --folder "/path/to/FCS Exports/RASA3" \
+python Normalization_estimator.py \
+  --folder <processed_parent_folder> \
   --low 55 \
   --high 65
 ```
@@ -80,9 +80,11 @@ normalized_FL2_AUC = AUC(loading_FL2 / max(loading_FL2))
 
 This produces a normalized-FL2 `AUC_std` that can be used as an alternative when absolute FL2 intensity is less desirable as the correction reference. In this version, the correction is based on the shape and timing of the R18 loading curve after each trace has been scaled to its own maximum. It therefore reduces dependence on absolute FL2 amplitude, which may vary with acquisition settings, staining/loading magnitude, or session-level intensity differences.
 
-This option should be interpreted as an alternative or sensitivity analysis, not as a claim that normalized-FL2 AUC is universally superior to absolute-FL2 AUC. For publication, report clearly which AUC standardization was used for the main analysis. If both versions are used, keep the absolute-FL2 and normalized-FL2 results separate and describe the normalized-FL2 workflow as a robustness/alternative processing route.
+This option was added for cases where R18 loading appears excessive relative to the range observed in the WT calibration traces. In those cases, FL2 fluorescence can be substantially above the usual range and can skew absolute-FL2-AUC normalization, even when the Leo.H4/HeadP_Ab quenching dynamics and apparent availability of FRET acceptors are not otherwise changed. The normalized-FL2 pathway is therefore useful as an assay-debugging and robustness workflow for reducing sensitivity to unusually high R18 amplitude.
 
-No additional damping, exponent, gamma, or empirical scaling factor is applied in this workflow. The per-trace correction coefficient is:
+This option should be interpreted as an alternative or sensitivity analysis, not as a claim that normalized-FL2 AUC is universally superior to absolute-FL2 AUC. For primary analysis, use a single prespecified pathway and report clearly whether absolute-FL2 AUC or normalized-FL2 AUC was used.
+
+The per-trace correction coefficient is:
 
 ```text
 correction_coefficient = normalized_FL2_AUC / normalized_FL2_AUCSTD
@@ -90,8 +92,8 @@ correction_coefficient = normalized_FL2_AUC / normalized_FL2_AUCSTD
 
 Example:
 ```bash
-python3 FACSScripts/Paper/Normalization_estimator_normalized_FL2.py \
-  --folder "/path/to/FCS Exports/WT" \
+python3 Normalization_estimator_normalized_FL2.py \
+  --folder <processed_parent_folder> \
   --low 55 \
   --high 65
 ```
@@ -105,8 +107,6 @@ Notebook outputs:
 - Per-subfolder: `Analyzed_normalized_FL2_AUC.xlsx`.
 - Master-level: `result_normalized_FL2_AUC.xlsx` with `Resting` and `Activated` values.
 
-## Repository Archiving
-For publication, archive the final GitHub release in a permanent repository such as Zenodo and cite the resulting DOI in the manuscript. The archived version should include this `Paper/` folder, the analysis notebooks, scripts, and enough usage notes for a reader to reproduce the reported processing steps.
 
 ## Notes
 - The scripts assume split outputs are under `Loading_Baseline/` in each experiment subfolder.

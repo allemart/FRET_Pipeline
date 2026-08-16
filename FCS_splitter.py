@@ -19,7 +19,7 @@ Output:
   `baseline_fl1.csv`, `baseline_fl2.csv`, `activated_fl1.csv`.
 
 CLI example:
-`python FCS_splitter.py --parent-folder "/path/to/exports" --process-subfolders`
+`python FCS_splitter.py --parent-folder <flowjo_export_folder> --process-subfolders`
 """
 
 import argparse
@@ -176,7 +176,7 @@ def _build_parser():
     )
     parser.add_argument(
         "--parent-folder",
-        default="/Users/alexeymartyanov/Desktop/FCS Exports/JAK2",
+        required=True,
         help="Folder containing experiment subfolders (or CSVs if --no-process-subfolders).",
     )
     parser.add_argument(

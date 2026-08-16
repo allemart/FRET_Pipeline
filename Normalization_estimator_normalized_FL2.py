@@ -23,7 +23,7 @@ Pipeline summary:
 8. Export summary tables and trace plots.
 
 CLI example:
-`python3 Normalization_estimator_normalized_FL2.py --folder "/path/to/parent" --low 55 --high 65`
+`python3 Normalization_estimator_normalized_FL2.py --folder <processed_parent_folder> --low 55 --high 65`
 """
 
 import argparse
@@ -222,7 +222,7 @@ def _build_parser():
     )
     parser.add_argument(
         "--folder",
-        default="/Users/alexeymartyanov/Desktop/FCS Exports/WT",
+        required=True,
         help="Parent folder containing experiment subfolders with Loading_Baseline exports.",
     )
     parser.add_argument(
